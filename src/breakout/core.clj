@@ -4,12 +4,42 @@
             [quil.middleware :as m]
             [quil.core :as q :include-macros true]))
 
-(defn setup []
-  ; Set frame rate to 30 frames per second.
-  (q/frame-rate 30)
-  (background 230)
-  (stroke-weight 1)
-  {:ball [1 2]})
+;; -----------------------------------------------
+;; TRYING OUT A DIFFERENT DATA STRUCTURE
+;; -----------------------------------------------
+
+(def x-val
+ (into [] (for [x (range 0 15)
+      :let [y (+ (* x 20) 1)]]
+      y)))
+
+x-val
+
+(def y-val
+  [40 70 100 130 160])
+y-val
+
+(def brix
+  (let [x-val (into [] (for [x (range 0 15)
+      :let [y (+ (* x 20) 1)]] y))
+        y-val  [40 70 100 130 160]
+        z-val []]
+   (doall (for [x x-val
+                y y-val]
+            (into [] (conj z-val x y))))))
+
+brix
+(into [] (concat brix))
+
+(map vector [:a :b :c] [:d :e :f] [:g :h :i])
+
+(map #(conj [] %) y-val )
+
+
+
+
+;; -----------------------------------------------
+
 
 ;; make a line to follow a mouse
 (defn draw-line []
@@ -44,14 +74,18 @@ y-val
 (second @bricks)
 (last @bricks)
 
-(defn build-grid []
-   (for [x x-val
-         y y-val]
-     (swap! bricks conj [x y])))
+(def bbb (atom []))
+bbb
 
-(build-grid)
+(defn build-grid []
+   (doall (for [x x-val
+         y y-val]
+     (reset! bricks [x y]))))
+
 
 bricks
+
+(build-grid)
 
 (.contains [1 2 3] (- 15 5))
 
@@ -69,7 +103,7 @@ y-val
 
 (.contains x-val 21)
 
-(.contains (range 1 18) 20)
+(.contains (range 1 18) 15)
 
 (def example [41 40])
 
@@ -139,10 +173,18 @@ example
         (:h r))
      0.5))
 
+
+
+
+(defn setup []
+  ; Set frame rate to 30 frames per second.
+  (q/frame-rate 30)
+  (background 230)
+  (stroke-weight 1)
+  {:ball [1 2]}
+  (build-grid))
+
 (swap! bricks disj [1 40])
-
-
-
 
 ;; put it all together
 (defn draw-state [state]

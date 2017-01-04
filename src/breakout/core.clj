@@ -1,12 +1,13 @@
 (ns breakout.core
   (:require [quil.core :as q]
-            [quil.core :refer :all]
-            [quil.middleware :as m]
-            [quil.core :as q :include-macros true]))
+            [quil.middleware :as m]))
 
 ;; -----------------------------------------------
 ;; TRYING OUT A DIFFERENT DATA STRUCTURE
 ;; -----------------------------------------------
+
+(def brick-width 19)
+(def brick-height 29)
 
 (def x-val
  (into [] (for [x (range 0 15)
@@ -29,13 +30,28 @@ y-val
             (into [] (conj z-val x y))))))
 
 brix
-(into [] (concat brix))
 
-(map vector [:a :b :c] [:d :e :f] [:g :h :i])
+(into [] (concat brix))
 
 (map #(conj [] %) y-val )
 
+(def new (atom ()))
+(first @new)
+(first (first @new))
 
+;; generate xy-xy+x and xy-xy+y coordinates for one brick
+(defn generate [[a b]]
+  (let [;;new ()
+        x (take brick-width (iterate inc a))
+        x1 (take brick-width (repeat b))
+        y (take brick-height (repeat a))
+        y1 (take brick-height (iterate inc b))]
+    (swap! new conj (partition 2 (interleave x x1)))
+    (swap! new conj (partition 2 (interleave y y1)))))
+
+(generate [1 40])
+
+(partition 2 (take 8 (iterate inc 2)))
 
 
 ;; -----------------------------------------------

@@ -6,8 +6,11 @@
 ;; TRYING OUT A DIFFERENT DATA STRUCTURE
 ;; -----------------------------------------------
 
-(def brick-width 19)
-(def brick-height 29)
+;(def brick-width 19)
+;(def brick-height 29)
+
+(def brick-width 2)
+(def brick-height 3)
 
 (def x-val
  (into [] (for [x (range 0 15)
@@ -36,22 +39,50 @@ brix
 (map #(conj [] %) y-val )
 
 (def new (atom ()))
+new
 (first @new)
 (first (first @new))
 
-;; generate xy-xy+x and xy-xy+y coordinates for one brick
-(defn generate [[a b]]
-  (let [;;new ()
+(def grid (atom ()))
+grid
+
+
+(defn generate
+  "generate data structure for all outer pixels of one brick"
+  [[a b]]
+  (let [;one-brick ()
         x (take brick-width (iterate inc a))
         x1 (take brick-width (repeat b))
         y (take brick-height (repeat a))
-        y1 (take brick-height (iterate inc b))]
-    (swap! new conj (partition 2 (interleave x x1)))
-    (swap! new conj (partition 2 (interleave y y1)))))
+        y1 (take brick-height (iterate inc b))
+        xx (take brick-width (repeat (+ b brick-height)))
+        yy (take brick-height (repeat (+ a brick-width)))]
+    (swap! new conj (partition 2 (interleave x x1)))      ;; top
+    (swap! new conj (partition 2 (interleave x xx)))      ;; bottom
+    (swap! new conj (partition 2 (interleave y y1)))      ;; left
+    (swap! new conj (partition 2 (interleave yy y1)))     ;; right
+    (swap! grid conj @new))
+  (reset! new ()))
 
 (generate [1 40])
 
-(partition 2 (take 8 (iterate inc 2)))
+;; generate outer pixels of input bricks
+(last (#(map generate %) '([1 40] [20 60] [50 80])))
+
+(((50 80) (51 80)) ((50 83) (51 83)) ((50 80) (50 81) (50 82)) ((52 80) (52 81) (52 82))
+ ((20 60) (21 60)) ((20 63) (21 63)) ((20 60) (20 61) (20 62)) ((22 60) (22 61) (22 62))
+ ((1 40) (2 40)) ((1 43) (2 43)) ((1 40) (1 41) (1 42)) ((3 40) (3 41) (3 42)))
+
+((((52 80) (52 81) (52 82)) ((50 80) (50 81) (50 82)) ((50 83) (51 83)) ((50 80) (51 80))
+  ((22 60) (22 61) (22 62)) ((20 60) (20 61) (20 62)) ((20 63) (21 63)) ((20 60) (21 60))
+  ((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40)))
+ (((22 60) (22 61) (22 62)) ((20 60) (20 61) (20 62)) ((20 63) (21 63)) ((20 60) (21 60))
+  ((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40)))
+ (((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40))))
+
+((((52 80) (52 81) (52 82)) ((50 80) (50 81) (50 82)) ((50 83) (51 83)) ((50 80) (51 80)))
+ (((22 60) (22 61) (22 62)) ((20 60) (20 61) (20 62)) ((20 63) (21 63)) ((20 60) (21 60)))
+ (((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40))))
 
 
 ;; -----------------------------------------------

@@ -65,19 +65,53 @@ grid
 
 (generate [1 40])
 
+(def sample '([1 40] [20 60] [50 80]))
+
+sample
+
 ;; generate outer pixels of input bricks
-(#(map generate %) '([1 40] [20 60] [50 80]))
+(#(map generate %) sample)
 
 grid
+
+(apply concat (first @grid))
+
+(map #(apply concat %) @grid)
+
+(map #(apply concat (apply concat %)) @grid)
+
+(map #(vector (first %) (* 2 (second %)))
+            {:a 1 :b 2 :c 3})
+
+(def sample1 '((52 80) (52 81) (52 82) (50 80) (50 81) (50 82) (50 83) (51 83) (50 80) (51 80)))
+sample1
+
+(def sample-atom (atom ()))
+sample-atom
+
+(swap! sample-atom conj '((52 80) (51 80)))
+
 ;; => atom[((((52 80) (52 81) (52 82)) ((50 80) (50 81) (50 82)) ((50 83) (51 83)) ((50 80) (51 80)))
 ;;      (((22 60) (22 61) (22 62)) ((20 60) (20 61) (20 62)) ((20 63) (21 63)) ((20 60) (21 60)))
 ;;      (((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40))))]
 
 ;; get a map of key val of each brick
-(zipmap (take (count @grid) (iterate inc 1)) @grid)
-;; => {1 (((52 80) (52 81) (52 82)) ((50 80) (50 81) (50 82)) ((50 83) (51 83)) ((50 80) (51 80))),
-;;   2 (((22 60) (22 61) (22 62)) ((20 60) (20 61) (20 62)) ((20 63) (21 63)) ((20 60) (21 60))),
-;;   3 (((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40)))}
+(zipmap sample @grid)
+
+(last (first (zipmap sample @grid)))
+
+
+{[1 40] (((52 80) (52 81) (52 82)) ((50 80) (50 81) (50 82)) ((50 83) (51 83)) ((50 80) (51 80))),
+ [20 60] (((22 60) (22 61) (22 62)) ((20 60) (20 61) (20 62)) ((20 63) (21 63)) ((20 60) (21 60))),
+ [50 80] (((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40)))}
+
+(.contains sample1 '(50 220))
+
+(defn collision
+  "check if ball collided with a brick...."
+  [coordinates]
+  (+ (first coordinates) (last coordinates)))
+
 
 ;; TODO - find the right key val in the whole structure, get it's key, remove from grid
 

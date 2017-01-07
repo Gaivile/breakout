@@ -2,27 +2,53 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]))
 
-;; -----------------------------------------------
-;; TRYING OUT A DIFFERENT DATA STRUCTURE
-;; -----------------------------------------------
-
 ;(def brick-width 19)
 ;(def brick-height 29)
 
+;; sample data for development
 (def brick-width 2)
 (def brick-height 3)
 
-(def x-val
- (into [] (for [x (range 0 15)
-      :let [y (+ (* x 20) 1)]]
-      y)))
+(def sample '([1 40] [20 60] [50 80]))
 
-x-val
+sample
 
-(def y-val
-  [40 70 100 130 160])
+(def sample1 '((52 80) (52 81) (52 82) (50 80) (50 81) (50 82) (50 83) (51 83) (50 80) (51 80)))
 
-y-val
+sample1
+
+(.contains (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid)))))) '(1 40))
+
+(defn collides?
+  "Collision detection"
+  [coord]
+  ;; (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid))))))
+  ;; let [grid keys = x
+      ;;  grid values = y (partition 2 on values) ]
+  ;; check if values contain coord, if so - remove the right key-val from the grid
+  ;; another sample tried before - needs improvement:
+  ;; (.contains (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid)))))) '(1 40))
+  )
+
+;;(map #(vector (first %) (* 2 (second %)))
+      ;;      {:a 1 :b 2 :c 3})
+
+;; TODO - finish this
+(defn collision
+  "check if ball collided with a brick...."
+  [coordinates]
+  (+ (first coordinates) (last coordinates)))
+
+;; TODO - find the right key val in the whole structure, get it's key, remove from grid
+
+;; make a line to follow a mouse
+(defn draw-line []
+  (stroke-weight 10)
+  (let [x (mouse-x)
+        y (mouse-y)]
+    (if(and (> x 0) (> y 0) (> x (width)) (> y (height)))
+    (conj state 0)
+    (line [(- x 25) 450] [(+ x 25) 450]))))
 
 ;; upper left coordinates of each brick
 (def brix
@@ -35,16 +61,20 @@ y-val
             (into [] (conj z-val x y))))))
 
 brix
+;; => ([1 40] [1 70] [1 100] [1 130] [1 160] [21 40] [21 70] [21 100] [21 130] [21 160]
+;;   [41 40] [41 70] [41 100] [41 130] [41 160] [61 40] [61 70] [61 100] [61 130] [61 160]
+;;   [81 40] [81 70] [81 100] [81 130] [81 160] [101 40] [101 70] [101 100] [101 130] [101 160]
+;;   [121 40] [121 70] [121 100] [121 130] [121 160] [141 40] [141 70] [141 100] [141 130] [141 160]
+;;   [161 40] [161 70] [161 100] [161 130] [161 160] [181 40] [181 70] [181 100] [181 130] [181 160]
+;;   [201 40] [201 70] [201 100] [201 130] [201 160] [221 40] [221 70] [221 100] [221 130] [221 160]
+;;   [241 40] [241 70] [241 100] [241 130] [241 160] [261 40] [261 70] [261 100] [261 130] [261 160]
+;;   [281 40] [281 70] [281 100] [281 130] [281 160])
 
 ;; an atom to temporary store data
 (def new (atom ()))
-new
-(first @new)
-(first (first @new))
 
 ;; an atom to store all outer pixels of all bricks
 (def grid (atom ()))
-grid
 
 (defn generate
   "Generate data structure for all outer pixels of one brick"
@@ -56,157 +86,15 @@ grid
         y1 (take brick-height (iterate inc b))
         xx (take brick-width (repeat (+ b brick-height)))
         yy (take brick-height (repeat (+ a brick-width)))]
-    (swap! new conj (partition 2 (interleave x x1)))      ;; top
-    (swap! new conj (partition 2 (interleave x xx)))      ;; bottom
-    (swap! new conj (partition 2 (interleave y y1)))      ;; left
-    (swap! new conj (partition 2 (interleave yy y1)))     ;; right
+    (swap! new conj (interleave x x1))      ;; top
+    (swap! new conj (interleave x xx))      ;; bottom
+    (swap! new conj (interleave y y1))      ;; left
+    (swap! new conj (interleave yy y1))     ;; right
     (swap! grid conj @new))
   (reset! new ()))
 
-(generate [1 40])
-
-(def sample '([1 40] [20 60] [50 80]))
-
-sample
-
-;; generate outer pixels of input bricks
-(#(map generate %) sample)
-
-grid
-
-(apply concat (first @grid))
-
-(map #(apply concat %) @grid)
-
-(map #(apply concat (apply concat %)) @grid)
-
-(map #(vector (first %) (* 2 (second %)))
-            {:a 1 :b 2 :c 3})
-
-(def sample1 '((52 80) (52 81) (52 82) (50 80) (50 81) (50 82) (50 83) (51 83) (50 80) (51 80)))
-sample1
-
-(def sample-atom (atom ()))
-sample-atom
-
-(swap! sample-atom conj '((52 80) (51 80)))
-
-;; => atom[((((52 80) (52 81) (52 82)) ((50 80) (50 81) (50 82)) ((50 83) (51 83)) ((50 80) (51 80)))
-;;      (((22 60) (22 61) (22 62)) ((20 60) (20 61) (20 62)) ((20 63) (21 63)) ((20 60) (21 60)))
-;;      (((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40))))]
-
-;; get a map of key val of each brick
-(zipmap sample @grid)
-
-(last (first (zipmap sample @grid)))
-
-
-{[1 40] (((52 80) (52 81) (52 82)) ((50 80) (50 81) (50 82)) ((50 83) (51 83)) ((50 80) (51 80))),
- [20 60] (((22 60) (22 61) (22 62)) ((20 60) (20 61) (20 62)) ((20 63) (21 63)) ((20 60) (21 60))),
- [50 80] (((3 40) (3 41) (3 42)) ((1 40) (1 41) (1 42)) ((1 43) (2 43)) ((1 40) (2 40)))}
-
-(.contains sample1 '(50 220))
-
-(defn collision
-  "check if ball collided with a brick...."
-  [coordinates]
-  (+ (first coordinates) (last coordinates)))
-
-
-;; TODO - find the right key val in the whole structure, get it's key, remove from grid
-
-;; -----------------------------------------------
-
-
-;; make a line to follow a mouse
-(defn draw-line []
-  (stroke-weight 10)
-  (let [x (mouse-x)
-        y (mouse-y)]
-    (if(and (> x 0) (> y 0) (> x (width)) (> y (height)))
-    (conj state 0)
-    (line [(- x 25) 450] [(+ x 25) 450]))))
-
-;; make a list of x-values
-(defn grid-x [i]
-  (for [x (range 0 15)
-      :let [y (+ (* x 20) 1)]]
-      y))
-
-(grid-x 1)
-
-;; make vectors out of x and y values
-(def x-val
-  (into [] (grid-x 1)))
-
-(def y-val
-  [40 70 100 130 160])
-
-x-val
-y-val
-
-(def bricks (atom #{}))
-
-(first @bricks)
-(second @bricks)
-(last @bricks)
-
-(def bbb (atom []))
-bbb
-
-(defn build-grid []
-   (doall (for [x x-val
-         y y-val]
-     (reset! bricks [x y]))))
-
-
-bricks
-
-(build-grid)
-
-(.contains [1 2 3] (- 15 5))
-
-#_(defn detect-collision [some-val]
-  (if (.contains y-val (:y some-val))
-    )
-  )
-
-;; if :y ball = value which is in y-val (.contains), check for x-val (1-20, 21-30, 31-40, etc)
-;; if :x ball = value which is in x-val, check for y-val (40-69, 70-99, 100-129, etc) - get thje first value (40, 70, etc)
-;; then remove from "bricks"
-
-x-val
-y-val
-
-(.contains x-val 21)
-
-(.contains (range 1 18) 15)
-
-(def example [41 40])
-
-example
-
-(defn fff [data]
-  (if (and (>= (first data) (first example)) (<= (first data) (+ (first example ) 18)))
-    "works"
-    "no works"))
-
-(fff [40 40])
-
-(map #(str "Hello " % "!" ) ["Ford" "Arthur" "Tricia"])
-
-
-
-(defn ggg [data]
-  (if (.contains (range (first example) (+ (first example) 18)) (first data))
-    "yay"
-    "nay"))
-
-(ggg [80 40])
-
-
-
 ;; draw a grid of bricks on the screen
+;; TODO - refactor this to take the right values from the grid (keys @grid) - or smth
 (defn draw-bricks []
   (stroke-weight 0)
   (doseq [[x y] @bricks]
@@ -250,18 +138,21 @@ example
         (:h r))
      0.5))
 
-
-
-
 (defn setup []
   ; Set frame rate to 30 frames per second.
   (q/frame-rate 30)
   (background 230)
   (stroke-weight 1)
   {:ball [1 2]}
+  ;; generate outer pixels of input bricks
+  (#(map generate %) brix)
+  (reset! grid (zipmap brix (sort-by first (map #(apply concat %) @grid))))
   (build-grid))
 
-(swap! bricks disj [1 40])
+grid
+;; => atom[{[1 40] (3 40 3 41 3 42 1 40 1 41 1 42 1 43 2 43 1 40 2 40),
+;;   [20 60] (22 60 22 61 22 62 20 60 20 61 20 62 20 63 21 63 20 60 21 60),
+;;   [50 80] (52 80 52 81 52 82 50 80 50 81 50 82 50 83 51 83 50 80 51 80)}]
 
 ;; put it all together
 (defn draw-state [state]
@@ -285,10 +176,7 @@ ball-dir
             (< (:y @ball) 0)
             ;; make a ball bounce off the bricks
             (<= (:y @ball) 190))
-    (swap! ball-dir (fn [[x y]] [x (- y)])))
-
-  )
-
+    (swap! ball-dir (fn [[x y]] [x (- y)]))))
 
 ;; run
 (q/defsketch breakout

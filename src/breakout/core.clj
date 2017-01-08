@@ -2,12 +2,12 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]))
 
-;(def brick-width 19)
-;(def brick-height 29)
+(def brick-width 19)
+(def brick-height 29)
 
 ;; sample data for development
-(def brick-width 2)
-(def brick-height 3)
+;;(def brick-width 2)
+;;(def brick-height 3)
 
 (def sample '([1 40] [20 60] [50 80]))
 
@@ -17,9 +17,9 @@ sample
 
 sample1
 
-(.contains (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid)))))) '(1 40))
+;;(.contains (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid)))))) '(1 40))
 
-(defn collides?
+#_(defn collides?
   "Collision detection"
   [coord]
   ;; (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid))))))
@@ -34,7 +34,7 @@ sample1
       ;;      {:a 1 :b 2 :c 3})
 
 ;; TODO - finish this
-(defn collision
+#_(defn collision
   "check if ball collided with a brick...."
   [coordinates]
   (+ (first coordinates) (last coordinates)))
@@ -42,13 +42,13 @@ sample1
 ;; TODO - find the right key val in the whole structure, get it's key, remove from grid
 
 ;; make a line to follow a mouse
-(defn draw-line []
-  (stroke-weight 10)
-  (let [x (mouse-x)
-        y (mouse-y)]
-    (if(and (> x 0) (> y 0) (> x (width)) (> y (height)))
+(defn draw-line [state]
+  (q/stroke-weight 10)
+  (let [x (q/mouse-x)
+        y (q/mouse-y)]
+    (if(and (> x 0) (> y 0) (> x (q/width)) (> y (q/height)))
     (conj state 0)
-    (line [(- x 25) 450] [(+ x 25) 450]))))
+    (q/line [(- x 25) 450] [(+ x 25) 450]))))
 
 ;; upper left coordinates of each brick
 (def brix
@@ -76,6 +76,7 @@ brix
 ;; an atom to store all outer pixels of all bricks
 (def grid (atom ()))
 
+;; TODO - refactor so [a b] it's added to grid as a key for each list of conjoined lists
 (defn generate
   "Generate data structure for all outer pixels of one brick"
   [[a b]]
@@ -96,8 +97,8 @@ brix
 ;; draw a grid of bricks on the screen
 ;; TODO - refactor this to take the right values from the grid (keys @grid) - or smth
 (defn draw-bricks []
-  (stroke-weight 0)
-  (doseq [[x y] @bricks]
+  (q/stroke-weight 0)
+  (doseq [[x y] brix]
     (if (= y 40)
       (q/fill 0 0 0))
     (if (= y 70)
@@ -141,15 +142,27 @@ brix
 (defn setup []
   ; Set frame rate to 30 frames per second.
   (q/frame-rate 30)
-  (background 230)
-  (stroke-weight 1)
+  (q/background 230)
+  (q/stroke-weight 1)
   {:ball [1 2]}
   ;; generate outer pixels of input bricks
-  (#(map generate %) brix)
-  (reset! grid (zipmap brix (sort-by first (map #(apply concat %) @grid))))
-  (build-grid))
+ ; (#(map generate %) brix)
+  ;(reset! grid (zipmap brix (sort-by first (map #(apply concat %) @grid))))
+  )
 
+brix
+
+(#(map generate %) brix)
+
+;; WRONG STRUCTURE!
+(reset! grid (zipmap brix (sort-by first (map #(apply concat %) @grid))))
+
+
+new
 grid
+
+(reset! new ())
+(reset! grid ())
 ;; => atom[{[1 40] (3 40 3 41 3 42 1 40 1 41 1 42 1 43 2 43 1 40 2 40),
 ;;   [20 60] (22 60 22 61 22 62 20 60 20 61 20 62 20 63 21 63 20 60 21 60),
 ;;   [50 80] (52 80 52 81 52 82 50 80 50 81 50 82 50 83 51 83 50 80 51 80)}]
@@ -157,7 +170,7 @@ grid
 ;; put it all together
 (defn draw-state [state]
   (q/background 240)
-  (draw-line)
+  (draw-line state)
   (draw-bricks)
   (draw-ball @ball))
 
@@ -172,7 +185,7 @@ ball-dir
   (when (or (> (:x @ball) 300) (< (:x @ball) 0))
     (swap! ball-dir (fn [[x y]] [y (- x)])))
   ;; invert y direction & make a ball bounce off the paddle
-  (when (or (and (> (:y @ball) 445) (and (>= (:x @ball) (- (mouse-x) 25)) (<= (:x @ball) (+ (mouse-x) 25))))
+  (when (or (and (> (:y @ball) 445) (and (>= (:x @ball) (- (q/mouse-x) 25)) (<= (:x @ball) (+ (q/mouse-x) 25))))
             (< (:y @ball) 0)
             ;; make a ball bounce off the bricks
             (<= (:y @ball) 190))

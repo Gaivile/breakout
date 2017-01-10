@@ -134,12 +134,6 @@ brix
   (q/fill 0)
   (q/ellipse (:x r) (:y r) (:w r) (:h r)))
 
-;; TODO - function to make a ball bounce back off the objects
-(defn bounce [r b]
-  (- (/ (- (:x b) (:x r))
-        (:h r))
-     0.5))
-
 (defn setup []
   ; Set frame rate to 30 frames per second.
   (q/frame-rate 30)
@@ -147,11 +141,10 @@ brix
   (q/stroke-weight 1)
   {:ball [1 2]}
   ;; generate outer pixels of input bricks
-  (#(map generate %) brix)
-  ;(reset! grid (zipmap brix (sort-by first (map #(apply concat %) @grid))))
-  )
+  ;(#(map generate %) brix)
+  (println (#(map generate %) brix))) ;; a hack...?
 
-
+grid
 
 ;; put it all together
 (defn draw-state [state]

@@ -3,3 +3,17 @@ quit
 (use 'src/breakout/core.clj)
 (require 'src/breakout/core.clj)
 quit
+(require 'breakout.core)
+grid
+(def brick-width 19)
+(def brick-height 29)
+(defn draw-line [state]
+  (q/stroke-weight 10)
+  (let [x (q/mouse-x)
+        y (q/mouse-y)]
+    (if(and (> x 0) (> y 0) (> x (q/width)) (> y (q/height)))
+    (conj state 0)
+    (q/line [(- x 25) 450] [(+ x 25) 450]))))
+(:require [quil.core :as q]
+            [quil.middleware :as m])
+quit

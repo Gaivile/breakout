@@ -91,6 +91,7 @@ brix
     (swap! new conj (interleave x xx))      ;; bottom
     (swap! new conj (interleave y y1))      ;; left
     (swap! new conj (interleave yy y1))     ;; right
+    (swap! new conj [a b])
     (swap! grid conj @new))
   (reset! new ()))
 
@@ -146,26 +147,11 @@ brix
   (q/stroke-weight 1)
   {:ball [1 2]}
   ;; generate outer pixels of input bricks
- ; (#(map generate %) brix)
+  (#(map generate %) brix)
   ;(reset! grid (zipmap brix (sort-by first (map #(apply concat %) @grid))))
   )
 
-brix
 
-(#(map generate %) brix)
-
-;; WRONG STRUCTURE!
-(reset! grid (zipmap brix (sort-by first (map #(apply concat %) @grid))))
-
-
-new
-grid
-
-(reset! new ())
-(reset! grid ())
-;; => atom[{[1 40] (3 40 3 41 3 42 1 40 1 41 1 42 1 43 2 43 1 40 2 40),
-;;   [20 60] (22 60 22 61 22 62 20 60 20 61 20 62 20 63 21 63 20 60 21 60),
-;;   [50 80] (52 80 52 81 52 82 50 80 50 81 50 82 50 83 51 83 50 80 51 80)}]
 
 ;; put it all together
 (defn draw-state [state]

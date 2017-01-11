@@ -5,18 +5,6 @@
 (def brick-width 19)
 (def brick-height 29)
 
-;; sample data for development
-;;(def brick-width 2)
-;;(def brick-height 3)
-
-(def sample '([1 40] [20 60] [50 80]))
-
-sample
-
-(def sample1 '((52 80) (52 81) (52 82) (50 80) (50 81) (50 82) (50 83) (51 83) (50 80) (51 80)))
-
-sample1
-
 ;;(.contains (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid)))))) '(1 40))
 
 #_(defn collides?
@@ -31,7 +19,7 @@ sample1
   )
 
 ;;(map #(vector (first %) (* 2 (second %)))
-      ;;      {:a 1 :b 2 :c 3})
+         ;;   {:a 1 :b 2 :c 3})
 
 ;; TODO - finish this
 #_(defn collision
@@ -99,7 +87,8 @@ brix
 ;; TODO - refactor this to take the right values from the grid (keys @grid) - or smth
 (defn draw-bricks []
   (q/stroke-weight 0)
-  (doseq [[x y] brix]
+  (let [upper-left (map #(first %) @grid)]
+  (doseq [[x y] upper-left]
     (if (= y 40)
       (q/fill 0 0 0))
     (if (= y 70)
@@ -113,7 +102,8 @@ brix
     (let [w 18
           h 28
           r 5]
-      (q/rect x y w h r))))
+      (q/rect x y w h r)))))
+
 
 ;; make a ball
 (def ball (atom {:x 150 :y 300 :w 15 :h 15}))
@@ -142,9 +132,8 @@ brix
   {:ball [1 2]}
   ;; generate outer pixels of input bricks
   ;(#(map generate %) brix)
-  (println (#(map generate %) brix))) ;; a hack...?
-
-grid
+  (println (#(map generate %) brix))
+  (println @grid)) ;; a hack...?
 
 ;; put it all together
 (defn draw-state [state]

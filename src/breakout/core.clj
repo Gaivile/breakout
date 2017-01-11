@@ -5,30 +5,6 @@
 (def brick-width 19)
 (def brick-height 29)
 
-;;(.contains (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid)))))) '(1 40))
-
-#_(defn collides?
-  "Collision detection"
-  [coord]
-  ;; (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid))))))
-  ;; let [grid keys = x
-      ;;  grid values = y (partition 2 on values) ]
-  ;; check if values contain coord, if so - remove the right key-val from the grid
-  ;; another sample tried before - needs improvement:
-  ;; (.contains (partition 2(val (first (zipmap sample (sort-by first (map #(apply concat %) @grid)))))) '(1 40))
-  )
-
-;;(map #(vector (first %) (* 2 (second %)))
-         ;;   {:a 1 :b 2 :c 3})
-
-;; TODO - finish this
-#_(defn collision
-  "check if ball collided with a brick...."
-  [coordinates]
-  (+ (first coordinates) (last coordinates)))
-
-;; TODO - find the right key val in the whole structure, get it's key, remove from grid
-
 ;; make a line to follow a mouse
 (defn draw-line [state]
   (q/stroke-weight 10)
@@ -48,28 +24,16 @@
                 y y-val]
             (into [] (conj z-val x y))))))
 
-brix
-;; => ([1 40] [1 70] [1 100] [1 130] [1 160] [21 40] [21 70] [21 100] [21 130] [21 160]
-;;   [41 40] [41 70] [41 100] [41 130] [41 160] [61 40] [61 70] [61 100] [61 130] [61 160]
-;;   [81 40] [81 70] [81 100] [81 130] [81 160] [101 40] [101 70] [101 100] [101 130] [101 160]
-;;   [121 40] [121 70] [121 100] [121 130] [121 160] [141 40] [141 70] [141 100] [141 130] [141 160]
-;;   [161 40] [161 70] [161 100] [161 130] [161 160] [181 40] [181 70] [181 100] [181 130] [181 160]
-;;   [201 40] [201 70] [201 100] [201 130] [201 160] [221 40] [221 70] [221 100] [221 130] [221 160]
-;;   [241 40] [241 70] [241 100] [241 130] [241 160] [261 40] [261 70] [261 100] [261 130] [261 160]
-;;   [281 40] [281 70] [281 100] [281 130] [281 160])
-
 ;; an atom to temporary store data
 (def new (atom ()))
 
 ;; an atom to store all outer pixels of all bricks
 (def grid (atom ()))
 
-;; TODO - refactor so [a b] it's added to grid as a key for each list of conjoined lists
 (defn generate
   "Generate data structure for all outer pixels of one brick"
   [[a b]]
-  (let [;one-brick ()
-        x (take brick-width (iterate inc a))
+  (let [x (take brick-width (iterate inc a))
         x1 (take brick-width (repeat b))
         y (take brick-height (repeat a))
         y1 (take brick-height (iterate inc b))
@@ -79,12 +43,22 @@ brix
     (swap! new conj (interleave x xx))      ;; bottom
     (swap! new conj (interleave y y1))      ;; left
     (swap! new conj (interleave yy y1))     ;; right
+    (reset! new (partition 2 (flatten @new)))
     (swap! new conj [a b])
     (swap! grid conj @new))
   (reset! new ()))
 
+;; TODO - improve this
+(defn collision
+  "check if ball collided with a brick...."
+  [coordinates]
+  (let [x (.indexOf (map #(.contains % coordinates) @grid ) true) ]
+  (if (> x -1)
+    ((println "yay!")
+    (println coordinates)
+    (reset! grid (apply merge (drop (+ x 1) @grid) (take x @grid)))))))
+
 ;; draw a grid of bricks on the screen
-;; TODO - refactor this to take the right values from the grid (keys @grid) - or smth
 (defn draw-bricks []
   (q/stroke-weight 0)
   (let [upper-left (map #(first %) @grid)]
@@ -103,7 +77,6 @@ brix
           h 28
           r 5]
       (q/rect x y w h r)))))
-
 
 ;; make a ball
 (def ball (atom {:x 150 :y 300 :w 15 :h 15}))
@@ -131,9 +104,7 @@ brix
   (q/stroke-weight 1)
   {:ball [1 2]}
   ;; generate outer pixels of input bricks
-  ;(#(map generate %) brix)
-  (println (#(map generate %) brix))
-  (println @grid)) ;; a hack...?
+  (println (#(map generate %) brix)))   ;; a hack...?
 
 ;; put it all together
 (defn draw-state [state]
@@ -142,12 +113,10 @@ brix
   (draw-bricks)
   (draw-ball @ball))
 
-ball
-ball-dir
-
 ;; update
 (defn update-state [state]
   ;; move a ball to a next position
+  (collision (take 2 (vals @ball)))
   (swap! ball next-ball @ball-dir)
   ;; invert x direction
   (when (or (> (:x @ball) 300) (< (:x @ball) 0))

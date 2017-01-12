@@ -48,20 +48,11 @@
     (swap! grid conj @new))
   (reset! new ()))
 
-;; TODO - improve this
-(defn collision
-  "check if ball collided with a brick...."
-  [coordinates]
-  (let [x (.indexOf (map #(.contains % coordinates) @grid ) true) ]
-  (if (> x -1)
-    ((println "yay!")
-    (println coordinates)
-    (reset! grid (apply merge (drop (+ x 1) @grid) (take x @grid)))))))
-
 ;; draw a grid of bricks on the screen
 (defn draw-bricks []
   (q/stroke-weight 0)
   (let [upper-left (map #(first %) @grid)]
+    (println upper-left)
   (doseq [[x y] upper-left]
     (if (= y 40)
       (q/fill 0 0 0))
@@ -97,12 +88,27 @@
   (q/fill 0)
   (q/ellipse (:x r) (:y r) (:w r) (:h r)))
 
+;; TODO - improve this
+(defn collision
+  "check if ball collided with a brick...."
+  [coordinates]
+  (let [x (.indexOf (map #(.contains % coordinates) @grid ) true) ]
+  (if (> x -1)
+    ((println "yay!")
+    (println coordinates)
+     (println x)
+     (println (map #(first %) @grid))
+    (swap! ball-dir (fn [[a b]] [a (- b)]))
+    (reset! grid (apply merge (drop (+ x 1) @grid) (take x @grid)))
+     (println (map #(first %) @grid))
+     (println "aaa?!")))))
+
 (defn setup []
   ; Set frame rate to 30 frames per second.
   (q/frame-rate 30)
   (q/background 230)
   (q/stroke-weight 1)
-  {:ball [1 2]}
+ ; {:ball [1 2]}
   ;; generate outer pixels of input bricks
   (println (#(map generate %) brix)))   ;; a hack...?
 
@@ -123,9 +129,7 @@
     (swap! ball-dir (fn [[x y]] [y (- x)])))
   ;; invert y direction & make a ball bounce off the paddle
   (when (or (and (> (:y @ball) 445) (and (>= (:x @ball) (- (q/mouse-x) 25)) (<= (:x @ball) (+ (q/mouse-x) 25))))
-            (< (:y @ball) 0)
-            ;; make a ball bounce off the bricks
-            (<= (:y @ball) 190))
+            (< (:y @ball) 0))
     (swap! ball-dir (fn [[x y]] [x (- y)]))))
 
 ;; run

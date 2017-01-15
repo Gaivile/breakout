@@ -2,11 +2,13 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]))
 
+;; define width and height for bricks
 (def brick-width 19)
 (def brick-height 29)
 
-;; make a line to follow a mouse
-(defn draw-line [state]
+(defn draw-line
+  "Make a line to follow a mouse"
+  [state]
   (q/stroke-weight 10)
   (let [x (q/mouse-x)
         y (q/mouse-y)]
@@ -14,8 +16,8 @@
     (conj state 0)
     (q/line [(- x 25) 450] [(+ x 25) 450]))))
 
-;; upper left coordinates of each brick
 (def brix
+  "Upper left coordinates of each brick"
   (let [x-val (into [] (for [x (range 0 15)
       :let [y (+ (* x 20) 1)]] y))
         y-val  [40 70 100 130 160]
@@ -48,53 +50,77 @@
     (swap! grid conj @new))
   (reset! new ()))
 
-;; draw a grid of bricks on the screen
-(defn draw-bricks []
+;; define initial colours for bricks
+(def colour1 (atom '(255 13 169)))
+(def colour2 (atom '(13 255 169)))
+(def colour3 (atom '(169 13 255)))
+(def colour4 (atom '(255 169 13)))
+(def colour5 (atom '(13 169 255)))
+
+(defn draw-bricks
+  "Draw a grid of bricks on the screen"
+  []
   (q/stroke-weight 0)
   (let [upper-left (map #(first %) @grid)]
   (doseq [[x y] upper-left]
     (if (= y 40)
-      (q/fill 0 0 0))
+      (q/fill (first @colour1) (second @colour1) (last @colour1)))
     (if (= y 70)
-      (q/fill 255 255 0))
+      (q/fill (first @colour2) (second @colour2) (last @colour2)))
     (if (= y 100)
-      (q/fill 255 0 0))
+      (q/fill (first @colour3) (second @colour3) (last @colour3)))
     (if (= y 130)
-      (q/fill 0 255 255))
+      (q/fill (first @colour4) (second @colour4) (last @colour4)))
     (if (= y 160)
-      (q/fill 0 0 0))
-    (let [w 18
-          h 28
+      (q/fill (first @colour5) (second @colour5) (last @colour5)))
+    (let [w brick-width
+          h brick-height
           r 5]
       (q/rect x y w h r)))))
 
 ;; make a ball
 (def ball (atom {:x 150 :y 300 :w 15 :h 15}))
 
-;; make a ball directions (go left x=-2; go down y = 3)
-(def ball-dir (atom [1 -1]))
+;; make a ball directions
+(def ball-dir (atom [-1 1]))
 
-;; calculate the new position for the ball after moving one step into the direction
-(defn next-ball [ball dir]
+(defn next-ball
+  "Calculate the new position for the ball after moving one step into the direction"
+  [ball dir]
   (let [dx (first dir)
         dy (second dir)]
     (assoc ball :x (+ (:x ball) dx)
                 :y (+ (:y ball) dy))))
 
-;; draw a ball
-(defn draw-ball [r]
+(defn draw-ball
+  "Draw a ball"
+  [r]
   (q/stroke-weight 1)
   (q/fill 0)
   (q/ellipse (:x r) (:y r) (:w r) (:h r)))
 
-;; TODO - improve this
+(defn repaint
+  "Change colours for bricks"
+  []
+  (let [a [(rand-int 255) (rand-int 255) (rand-int 255)]
+        b [(rand-int 255) (rand-int 255) (rand-int 255)]
+        c [(rand-int 255) (rand-int 255) (rand-int 255)]
+        d [(rand-int 255) (rand-int 255) (rand-int 255)]
+        e [(rand-int 255) (rand-int 255) (rand-int 255)] ]
+    (reset! colour1 (into '() a))
+    (reset! colour2 (into '() b))
+    (reset! colour3 (into '() c))
+    (reset! colour4 (into '() d))
+    (reset! colour5 (into '() e))))
+
 (defn collision
-  "check if ball collided with a brick...."
+  "Check if ball collided with a brick, change directions for a ball and repaint the bricks"
   [coordinates]
   (let [x (.indexOf (map #(.contains % coordinates) @grid ) true) ]
   (if (> x -1)
     (do
     (swap! ball-dir (fn [[a b]] [a (- b)]))
+    (repaint)
     (reset! grid (apply merge (drop (+ x 1) @grid) (take x @grid)))))))
 
 (defn setup []

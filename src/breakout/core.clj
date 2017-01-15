@@ -52,7 +52,6 @@
 (defn draw-bricks []
   (q/stroke-weight 0)
   (let [upper-left (map #(first %) @grid)]
-    (println upper-left)
   (doseq [[x y] upper-left]
     (if (= y 40)
       (q/fill 0 0 0))
@@ -73,7 +72,7 @@
 (def ball (atom {:x 150 :y 300 :w 15 :h 15}))
 
 ;; make a ball directions (go left x=-2; go down y = 3)
-(def ball-dir (atom [-2 3]))
+(def ball-dir (atom [1 -1]))
 
 ;; calculate the new position for the ball after moving one step into the direction
 (defn next-ball [ball dir]
@@ -94,21 +93,15 @@
   [coordinates]
   (let [x (.indexOf (map #(.contains % coordinates) @grid ) true) ]
   (if (> x -1)
-    ((println "yay!")
-    (println coordinates)
-     (println x)
-     (println (map #(first %) @grid))
+    (do
     (swap! ball-dir (fn [[a b]] [a (- b)]))
-    (reset! grid (apply merge (drop (+ x 1) @grid) (take x @grid)))
-     (println (map #(first %) @grid))
-     (println "aaa?!")))))
+    (reset! grid (apply merge (drop (+ x 1) @grid) (take x @grid)))))))
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
-  (q/frame-rate 30)
+  (q/frame-rate 60)
   (q/background 230)
   (q/stroke-weight 1)
- ; {:ball [1 2]}
   ;; generate outer pixels of input bricks
   (println (#(map generate %) brix)))   ;; a hack...?
 

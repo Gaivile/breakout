@@ -121,7 +121,7 @@
   (when (or (> (:x @ball) 300) (< (:x @ball) 0))
     (swap! ball-dir (fn [[x y]] [y (- x)])))
   ;; invert y direction & make a ball bounce off the paddle
-  (when (or (and (> (:y @ball) 445) (and (>= (:x @ball) (- (q/mouse-x) 25)) (<= (:x @ball) (+ (q/mouse-x) 25))))
+  (when (or (and (= (:y @ball) 445) (and (>= (:x @ball) (- (q/mouse-x) 25)) (<= (:x @ball) (+ (q/mouse-x) 25))))
             (< (:y @ball) 0))
     (swap! ball-dir (fn [[x y]] [x (- y)]))))
 

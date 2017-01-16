@@ -1,8 +1,8 @@
 # Breakout
 Classical Breakout game implementation in Clojure using Quil library.
 
-### Current status:
-The game is playable, it changes the colour of each row of bricks on collision, however, there is no action on winning or losing a game.
+## Game is finished!
+The main objective is to remove all the bricks with a bouncing ball and to not let the ball fall down. In case of winning or losing, different screens appear - and the player can play again by simply clicking the mouse on the game screen. The colour of bricks is changing on each ball-brick collision.
 
 ![screenshot from 2017-01-15 20-08-12](https://cloud.githubusercontent.com/assets/11088666/21965875/8d8388b0-db60-11e6-89de-b6eb807b3a7d.png)
 

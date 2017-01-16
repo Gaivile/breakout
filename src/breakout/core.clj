@@ -79,10 +79,10 @@
       (q/rect x y w h r)))))
 
 ;; make a ball
-(def ball (atom {:x 150 :y 300 :w 15 :h 15}))
+(def ball (atom {}))
 
 ;; make a ball directions
-(def ball-dir (atom [-1 1]))
+(def ball-dir (atom []))
 
 (defn next-ball
   "Calculate the new position for the ball after moving one step into the direction"
@@ -121,13 +121,47 @@
     (do
     (swap! ball-dir (fn [[a b]] [a (- b)]))
     (repaint)
-    (reset! grid (apply merge (drop (+ x 1) @grid) (take x @grid)))))))
+    (reset! grid (apply merge (drop (+ x 1) @grid) (take x @grid)))
+    ;(reset! grid '())
+      ))))
+
+(defn win
+  "Check if grid is empty and display win screen"
+  []
+  (if (empty? @grid)
+    (do
+      (q/fill (rand-int 255) (rand-int 255) (rand-int 255))
+      (q/text-size 50)
+      (q/text "You won!!!" 25 150 )
+      (reset! ball-dir [0 0])
+      (play-again))))
+
+(defn lose
+  "Check if ball's position is bellow the paddle and display lose screen"
+  []
+  (if (> (:y @ball) 446)
+    (do
+      (q/fill (rand-int 255) (rand-int 255) (rand-int 255))
+      (q/text-size 50)
+      (q/text "You lost..." 35 300 )
+      (play-again))))
+
+(defn play-again
+  "After winning or losing, ask to play again"
+  []
+  (q/fill 0)
+  (q/text-size 30)
+  (q/text "Click to play again!" 10 400 )
+  (if (q/mouse-pressed?)
+    (setup)))
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
   (q/frame-rate 60)
   (q/background 230)
   (q/stroke-weight 1)
+  (reset! ball {:x 150 :y 300 :w 15 :h 15})
+  (reset! ball-dir [-1 1])
   ;; generate outer pixels of input bricks
   (println (#(map generate %) brix)))   ;; a hack...?
 
@@ -136,7 +170,9 @@
   (q/background 240)
   (draw-line state)
   (draw-bricks)
-  (draw-ball @ball))
+  (draw-ball @ball)
+  (win)
+  (lose))
 
 ;; update
 (defn update-state [state]

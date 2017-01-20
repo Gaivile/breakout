@@ -125,6 +125,27 @@
     ;(reset! grid '())
       ))))
 
+(defn setup []
+  ; Set frame rate to 30 frames per second.
+  (q/frame-rate 60)
+  (q/background 230)
+  (q/stroke-weight 1)
+  (reset! ball {:x 150 :y 300 :w 15 :h 15})
+  (reset! ball-dir [-1 1])
+  ;; generate outer pixels of input bricks
+  (println (#(map generate %) brix)))   ;; a hack...?
+
+(defn play-again
+  "After winning or losing, ask to play again"
+  []
+  (q/fill 0)
+  (q/text-size 30)
+  (q/text "Click to play again!" 10 400 )
+  (if (q/mouse-pressed?)
+    (do
+      (reset! grid ())
+      (setup))))
+
 (defn win
   "Check if grid is empty and display win screen"
   []
@@ -146,24 +167,6 @@
       (q/text "You lost..." 35 300 )
       (play-again))))
 
-(defn play-again
-  "After winning or losing, ask to play again"
-  []
-  (q/fill 0)
-  (q/text-size 30)
-  (q/text "Click to play again!" 10 400 )
-  (if (q/mouse-pressed?)
-    (setup)))
-
-(defn setup []
-  ; Set frame rate to 30 frames per second.
-  (q/frame-rate 60)
-  (q/background 230)
-  (q/stroke-weight 1)
-  (reset! ball {:x 150 :y 300 :w 15 :h 15})
-  (reset! ball-dir [-1 1])
-  ;; generate outer pixels of input bricks
-  (println (#(map generate %) brix)))   ;; a hack...?
 
 ;; put it all together
 (defn draw-state [state]
